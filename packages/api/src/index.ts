@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import newsletters from "./routes/newsletters.js";
 import articles from "./routes/articles.js";
+import { stopQueue } from "./queue.js";
 
 const app = new Hono();
 
@@ -32,4 +33,14 @@ const port = Number(process.env.PORT) || 3000;
 
 console.log(`API server starting on port ${port}`);
 
-serve({ fetch: app.fetch, port });
+const server = serve({ fetch: app.fetch, port });
+
+const shutdown = async () => {
+  console.log("Shutting down API server...");
+  await stopQueue();
+  server.close();
+  process.exit(0);
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
