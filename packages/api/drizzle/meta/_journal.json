@@ -8,6 +8,13 @@
       "when": 1773749885015,
       "tag": "0000_soft_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773763248136,
+      "tag": "0001_brief_shriek",
+      "breakpoints": true
     }
   ]
 }

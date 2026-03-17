@@ -1,23 +1,23 @@
+import { config } from "./config.js";
 import PgBoss from "pg-boss";
 import { fetchArticles } from "./article-fetcher.js";
 import { summarizePendingArticles } from "./article-summarizer.js";
 import { buildEdition } from "./edition-builder.js";
-
-const connectionString =
-  process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/newsletter";
-
-const FETCH_CRON = process.env.FETCH_CRON ?? "0 6,12,18 * * *";
 const FETCH_JOB = "article-fetch";
 const SUMMARIZE_JOB = "article-summarize";
 const BUILD_EDITION_JOB = "edition-build";
 
 async function main() {
-  const boss = new PgBoss(connectionString);
+  const boss = new PgBoss(config.databaseUrl);
 
   boss.on("error", (error) => console.error("pg-boss error:", error));
 
   await boss.start();
   console.log("Worker started");
+
+  await boss.createQueue(FETCH_JOB);
+  await boss.createQueue(SUMMARIZE_JOB);
+  await boss.createQueue(BUILD_EDITION_JOB);
 
   await boss.work(FETCH_JOB, async () => {
     console.log("Starting article fetch...");
@@ -49,8 +49,8 @@ async function main() {
     console.log(`Edition build complete: ${result.date}, ${result.articleCount} articles`);
   });
 
-  await boss.schedule(FETCH_JOB, FETCH_CRON, { retryLimit: 3, retryDelay: 60 });
-  console.log(`Scheduled ${FETCH_JOB} with cron: ${FETCH_CRON}`);
+  await boss.schedule(FETCH_JOB, config.fetchCron, { retryLimit: 3, retryDelay: 60 });
+  console.log(`Scheduled ${FETCH_JOB} with cron: ${config.fetchCron}`);
 
   const shutdown = async () => {
     console.log("Shutting down worker...");

@@ -1,33 +1,32 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { db } from "./db/index.js";
 import { article } from "./db/schema.js";
 import { eq } from "drizzle-orm";
+import { config } from "./config.js";
 
-const client = new Anthropic();
+const client = new OpenAI({
+  apiKey: config.openrouterApiKey,
+  baseURL: "https://openrouter.ai/api/v1",
+});
 
-const RATE_LIMIT_DELAY_MS = Number(process.env.SUMMARIZE_RATE_LIMIT_MS ?? "1000");
-
-const SUMMARY_PROMPT = `Du er en norsk nyhetsredaktør. Skriv et kort og informativt sammendrag av følgende nyhetsartikkel på norsk. Sammendraget skal være på 2-3 setninger, og skal dekke de viktigste poengene i artikkelen. Bruk en nøytral og profesjonell tone.
-
-Artikkel:
-Tittel: {title}
-Kilde: {source}`;
+const SYSTEM_PROMPT = `Du er en norsk nyhetsredaktør. Skriv et kort og informativt sammendrag av følgende nyhetsartikkel på norsk. Sammendraget skal være på 2-3 setninger, og skal dekke de viktigste poengene i artikkelen. Bruk en nøytral og profesjonell tone. Svar kun med ren tekst uten markdown-formatering, overskrifter eller punktlister.`;
 
 async function summarizeArticle(title: string, sourceName: string): Promise<string> {
-  const prompt = SUMMARY_PROMPT.replace("{title}", title).replace("{source}", sourceName);
-
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+  const response = await client.chat.completions.create({
+    model: "Qwen/Qwen2.5-7B-Instruct",
     max_tokens: 300,
-    messages: [{ role: "user", content: prompt }],
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: `Artikkel:\nTittel: ${title}\nKilde: ${sourceName}` },
+    ],
   });
 
-  const block = message.content[0];
-  if (block.type !== "text") {
-    throw new Error("Unexpected response type from Claude API");
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    throw new Error("Empty response from OpenRouter");
   }
 
-  return block.text;
+  return text;
 }
 
 export async function summarizePendingArticles(): Promise<{ summarized: number; failed: number }> {
@@ -62,7 +61,7 @@ export async function summarizePendingArticles(): Promise<{ summarized: number; 
     }
 
     if (pending.indexOf(a) < pending.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY_MS));
+      await new Promise((resolve) => setTimeout(resolve, config.summarizeRateLimitMs));
     }
   }
 

@@ -1,1 +1,105 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+
+  --color-surface: oklch(0.985 0.005 75);
+  --color-surface-raised: oklch(0.995 0.003 75);
+  --color-ink: oklch(0.18 0.01 55);
+  --color-ink-secondary: oklch(0.42 0.01 55);
+  --color-ink-tertiary: oklch(0.58 0.008 55);
+  --color-border: oklch(0.88 0.01 65);
+  --color-border-light: oklch(0.93 0.008 65);
+
+  --color-accent: oklch(0.48 0.17 28);
+  --color-accent-hover: oklch(0.40 0.17 28);
+  --color-accent-light: oklch(0.94 0.03 28);
+  --color-accent-subtle: oklch(0.97 0.015 28);
+
+  --animate-fade-in: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+:root {
+  --background: oklch(0.985 0.005 75);
+  --foreground: oklch(0.18 0.01 55);
+  --card: oklch(0.995 0.003 75);
+  --card-foreground: oklch(0.18 0.01 55);
+  --popover: oklch(0.995 0.003 75);
+  --popover-foreground: oklch(0.18 0.01 55);
+  --primary: oklch(0.48 0.17 28);
+  --primary-foreground: oklch(0.99 0.005 75);
+  --secondary: oklch(0.94 0.03 28);
+  --secondary-foreground: oklch(0.40 0.17 28);
+  --muted: oklch(0.93 0.008 65);
+  --muted-foreground: oklch(0.42 0.01 55);
+  --accent: oklch(0.97 0.015 28);
+  --accent-foreground: oklch(0.40 0.17 28);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.01 65);
+  --input: oklch(0.88 0.01 65);
+  --ring: oklch(0.48 0.17 28);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
