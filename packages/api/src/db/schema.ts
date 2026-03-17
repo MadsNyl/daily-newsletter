@@ -36,3 +36,23 @@ export const editionArticle = pgTable(
   },
   (table) => [unique().on(table.editionId, table.articleId)],
 );
+
+export const company = pgTable("company", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ticker: text("ticker").notNull().unique(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const articleCompany = pgTable(
+  "article_company",
+  {
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => company.id, { onDelete: "cascade" }),
+  },
+  (table) => [unique().on(table.articleId, table.companyId)],
+);
