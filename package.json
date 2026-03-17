@@ -1,0 +1,32 @@
+{
+  "name": "daily-newsletter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @daily-newsletter/api dev",
+    "dev:worker": "pnpm --filter @daily-newsletter/worker dev",
+    "dev:web": "pnpm --filter @daily-newsletter/web dev",
+    "dev": "pnpm run --parallel dev:api dev:worker dev:web",
+    "build": "pnpm run --recursive build",
+    "lint": "pnpm run --recursive lint",
+    "lint:fix": "pnpm run --recursive lint:fix",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx}\"",
+    "typecheck": "pnpm run --recursive typecheck",
+    "check": "pnpm run lint && pnpm run typecheck",
+    "db:generate": "pnpm --filter @daily-newsletter/api db:generate",
+    "db:migrate": "pnpm --filter @daily-newsletter/api db:migrate",
+    "db:push": "pnpm --filter @daily-newsletter/api db:push",
+    "db:studio": "pnpm --filter @daily-newsletter/api db:studio"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.3",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
+  }
+}
