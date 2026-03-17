@@ -4,7 +4,7 @@ import { article, newsletterEdition, editionArticle } from "./schema.js";
 async function seed() {
   console.log("Seeding database...");
 
-  const [a1, a2, a3] = await db
+  const [a1, a2] = await db
     .insert(article)
     .values([
       {
