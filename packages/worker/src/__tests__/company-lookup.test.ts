@@ -81,8 +81,10 @@ describe("company-lookup", () => {
         text: () => Promise.resolve(html),
       });
 
-      const returningChain = { returning: vi.fn().mockResolvedValue([{ id: "uuid-1", ticker: "EQNR.OSE", name: "EQUINOR" }]) };
-      const valuesChain = { values: vi.fn().mockReturnValue(returningChain) };
+      const inserted = [{ id: "uuid-1", ticker: "EQNR.OSE", name: "EQUINOR" }];
+      const returningChain = { returning: vi.fn().mockResolvedValue(inserted) };
+      const conflictChain = { onConflictDoNothing: vi.fn().mockReturnValue(returningChain) };
+      const valuesChain = { values: vi.fn().mockReturnValue(conflictChain) };
       (db.insert as ReturnType<typeof vi.fn>).mockReturnValue(valuesChain);
 
       const result = await resolveCompany("EQNR.OSE");
@@ -101,8 +103,10 @@ describe("company-lookup", () => {
 
       (fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Network error"));
 
-      const returningChain = { returning: vi.fn().mockResolvedValue([{ id: "uuid-1", ticker: "EQNR.OSE", name: "EQNR.OSE" }]) };
-      const valuesChain = { values: vi.fn().mockReturnValue(returningChain) };
+      const inserted = [{ id: "uuid-1", ticker: "EQNR.OSE", name: "EQNR.OSE" }];
+      const returningChain = { returning: vi.fn().mockResolvedValue(inserted) };
+      const conflictChain = { onConflictDoNothing: vi.fn().mockReturnValue(returningChain) };
+      const valuesChain = { values: vi.fn().mockReturnValue(conflictChain) };
       (db.insert as ReturnType<typeof vi.fn>).mockReturnValue(valuesChain);
 
       const result = await resolveCompany("EQNR.OSE");

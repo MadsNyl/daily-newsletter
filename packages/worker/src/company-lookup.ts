@@ -46,10 +46,21 @@ export async function resolveCompany(
     console.warn(`Failed to fetch company name for ${ticker}, using ticker as name`);
   }
 
-  const [inserted] = await db
+  const result = await db
     .insert(company)
     .values({ ticker, name })
+    .onConflictDoNothing({ target: company.ticker })
     .returning();
 
-  return { id: inserted.id, ticker: inserted.ticker, name: inserted.name };
+  if (result.length > 0) {
+    return { id: result[0].id, ticker: result[0].ticker, name: result[0].name };
+  }
+
+  // Race condition: another worker inserted first, fetch from DB
+  const [existing2] = await db
+    .select()
+    .from(company)
+    .where(eq(company.ticker, ticker));
+
+  return { id: existing2.id, ticker: existing2.ticker, name: existing2.name };
 }
