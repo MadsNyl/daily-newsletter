@@ -1,9 +1,11 @@
+import { config } from "./config.js";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import newsletters from "./routes/newsletters.js";
 import articles from "./routes/articles.js";
+import companies from "./routes/companies.js";
 import { stopQueue } from "./queue.js";
 
 const app = new Hono();
@@ -16,6 +18,7 @@ app.get("/api/health", (c) => {
 
 app.route("/api/newsletters", newsletters);
 app.route("/api/articles", articles);
+app.route("/api/companies", companies);
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
@@ -29,7 +32,7 @@ app.notFound((c) => {
   return c.json({ error: "Not found" }, 404);
 });
 
-const port = Number(process.env.PORT) || 3000;
+const port = config.port;
 
 console.log(`API server starting on port ${port}`);
 
