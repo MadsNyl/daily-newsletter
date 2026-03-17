@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../db/index.js";
 import { newsletterEdition, editionArticle, article } from "../db/schema.js";
 import { desc, eq, asc } from "drizzle-orm";
+import { getQueue } from "../queue.js";
 
 const app = new Hono();
 
@@ -74,6 +75,17 @@ app.get("/:date", async (c) => {
     .orderBy(asc(editionArticle.order));
 
   return c.json({ data: { ...edition, articles } });
+});
+
+app.post("/trigger", async (c) => {
+  const queue = await getQueue();
+  const jobId = await queue.send("article-fetch", {}, { retryLimit: 3, retryDelay: 60 });
+
+  if (!jobId) {
+    return c.json({ error: "Failed to queue job. A job may already be pending." }, 409);
+  }
+
+  return c.json({ message: "Newsletter pipeline triggered", jobId }, 201);
 });
 
 export default app;
