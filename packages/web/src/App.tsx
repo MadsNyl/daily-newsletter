@@ -1,8 +1,14 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import NewsletterPage from "./pages/NewsletterPage";
+
 export default function App() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-4xl font-bold">Daglig Nyhetsbrev</h1>
-      <p className="mt-2 text-gray-500">Norske nyheter, oppsummert daglig.</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<NewsletterPage />} />
+        <Route path="/:date" element={<NewsletterPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
