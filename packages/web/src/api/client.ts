@@ -1,3 +1,8 @@
+export interface Company {
+  ticker: string;
+  name: string;
+}
+
 export interface Article {
   id: string;
   title: string;
@@ -8,6 +13,7 @@ export interface Article {
   publishedAt: string | null;
   status: string;
   order: number;
+  companies: Company[];
 }
 
 export interface NewsletterEdition {
@@ -27,8 +33,15 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export async function fetchEdition(date: string): Promise<NewsletterEdition | null> {
-  const res = await fetch(`/api/newsletters/${date}`);
+export async function fetchEdition(
+  date: string,
+  company?: string,
+): Promise<NewsletterEdition | null> {
+  const params = new URLSearchParams();
+  if (company) params.set("company", company);
+  const query = params.toString();
+  const url = `/api/newsletters/${date}${query ? `?${query}` : ""}`;
+  const res = await fetch(url);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch edition: ${res.statusText}`);
   const json = await res.json();
@@ -42,4 +55,11 @@ export async function fetchEditions(
   const res = await fetch(`/api/newsletters?limit=${limit}&offset=${offset}`);
   if (!res.ok) throw new Error(`Failed to fetch editions: ${res.statusText}`);
   return res.json();
+}
+
+export async function fetchCompanies(date: string): Promise<Company[]> {
+  const res = await fetch(`/api/companies?date=${date}`);
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.data;
 }

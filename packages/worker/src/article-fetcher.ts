@@ -1,6 +1,6 @@
 import Parser from "rss-parser";
 import { db } from "./db/index.js";
-import { article, articleCompany, company } from "./db/schema.js";
+import { article, articleCompany } from "./db/schema.js";
 import { feeds, type FeedSource } from "./feeds.js";
 import { scrapeOkonomi24 } from "./scrapers/okonomi24.js";
 import { resolveCompany } from "./company-lookup.js";
