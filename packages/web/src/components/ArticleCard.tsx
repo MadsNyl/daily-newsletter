@@ -2,11 +2,9 @@ import { useState } from "react";
 import type { Article } from "../api/client";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
 
 interface ArticleCardProps {

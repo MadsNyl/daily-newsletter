@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Company } from "@/api/client";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
