@@ -140,9 +140,16 @@ app.get("/:ticker/quote", async (c) => {
   }
 
   try {
-    const res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.OSE`, {
+    // Try OSE (main exchange) first, fall back to MERK (Euronext Growth)
+    let res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.OSE`, {
       signal: AbortSignal.timeout(10000),
     });
+
+    if (!res.ok) {
+      res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.MERK`, {
+        signal: AbortSignal.timeout(10000),
+      });
+    }
 
     if (!res.ok) {
       return c.json({ error: "Failed to fetch quote data." }, 502);
