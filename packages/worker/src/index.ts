@@ -4,10 +4,12 @@ import { fetchArticles } from "./article-fetcher.js";
 import { summarizePendingArticles } from "./article-summarizer.js";
 import { buildEdition } from "./edition-builder.js";
 import { summarizeEdition } from "./edition-summarizer.js";
+import { syncTickers } from "./ticker-sync.js";
 const FETCH_JOB = "article-fetch";
 const SUMMARIZE_JOB = "article-summarize";
 const BUILD_EDITION_JOB = "edition-build";
 const SUMMARIZE_EDITION_JOB = "edition-summarize";
+const TICKER_SYNC_JOB = "ticker-sync";
 
 async function main() {
   const boss = new PgBoss(config.databaseUrl);
@@ -21,6 +23,7 @@ async function main() {
   await boss.createQueue(SUMMARIZE_JOB);
   await boss.createQueue(BUILD_EDITION_JOB);
   await boss.createQueue(SUMMARIZE_EDITION_JOB);
+  await boss.createQueue(TICKER_SYNC_JOB);
 
   await boss.work(FETCH_JOB, async () => {
     console.log("Starting article fetch...");
@@ -63,8 +66,19 @@ async function main() {
     console.log(`Edition summarize complete: ${result.date}, updated: ${result.updated}`);
   });
 
+  await boss.work(TICKER_SYNC_JOB, async () => {
+    console.log("Starting ticker sync...");
+    const result = await syncTickers();
+    console.log(
+      `Ticker sync complete: ${result.total} total, ${result.upserted} upserted, ${result.deactivated} deactivated`,
+    );
+  });
+
   await boss.schedule(FETCH_JOB, config.fetchCron, { retryLimit: 3, retryDelay: 60 });
   console.log(`Scheduled ${FETCH_JOB} with cron: ${config.fetchCron}`);
+
+  await boss.schedule(TICKER_SYNC_JOB, "0 6 * * *", { retryLimit: 3, retryDelay: 60 });
+  console.log(`Scheduled ${TICKER_SYNC_JOB} with cron: 0 6 * * *`);
 
   const shutdown = async () => {
     console.log("Shutting down worker...");
