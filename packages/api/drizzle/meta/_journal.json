@@ -22,6 +22,13 @@
       "when": 1773855384817,
       "tag": "0002_windy_wild_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773864448468,
+      "tag": "0003_furry_spitfire",
+      "breakpoints": true
     }
   ]
 }

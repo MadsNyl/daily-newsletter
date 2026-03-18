@@ -6,6 +6,7 @@ import { HTTPException } from "hono/http-exception";
 import newsletters from "./routes/newsletters.js";
 import articles from "./routes/articles.js";
 import companies from "./routes/companies.js";
+import tickers from "./routes/tickers.js";
 import { stopQueue } from "./queue.js";
 
 const app = new Hono();
@@ -19,6 +20,7 @@ app.get("/api/health", (c) => {
 app.route("/api/newsletters", newsletters);
 app.route("/api/articles", articles);
 app.route("/api/companies", companies);
+app.route("/api/tickers", tickers);
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {

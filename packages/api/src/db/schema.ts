@@ -1,4 +1,13 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer, unique } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  pgEnum,
+  integer,
+  unique,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 export const articleStatusEnum = pgEnum("article_status", ["PENDING", "SUMMARIZED", "FAILED"]);
 
@@ -42,6 +51,9 @@ export const company = pgTable("company", {
   id: uuid("id").defaultRandom().primaryKey(),
   ticker: text("ticker").notNull().unique(),
   name: text("name").notNull(),
+  exchange: text("exchange"),
+  isActive: boolean("is_active").notNull().default(true),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
