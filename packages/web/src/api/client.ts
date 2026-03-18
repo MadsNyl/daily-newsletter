@@ -1,3 +1,5 @@
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 export interface Company {
   ticker: string;
   name: string;
@@ -41,7 +43,7 @@ export async function fetchEdition(
   const params = new URLSearchParams();
   if (company) params.set("company", company);
   const query = params.toString();
-  const url = `/api/newsletters/${date}${query ? `?${query}` : ""}`;
+  const url = `${API_BASE}/api/newsletters/${date}${query ? `?${query}` : ""}`;
   const res = await fetch(url);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch edition: ${res.statusText}`);
@@ -53,13 +55,13 @@ export async function fetchEditions(
   limit = 20,
   offset = 0,
 ): Promise<PaginatedResponse<Omit<NewsletterEdition, "articles">>> {
-  const res = await fetch(`/api/newsletters?limit=${limit}&offset=${offset}`);
+  const res = await fetch(`${API_BASE}/api/newsletters?limit=${limit}&offset=${offset}`);
   if (!res.ok) throw new Error(`Failed to fetch editions: ${res.statusText}`);
   return res.json();
 }
 
 export async function fetchCompanies(date: string): Promise<Company[]> {
-  const res = await fetch(`/api/companies?date=${date}`);
+  const res = await fetch(`${API_BASE}/api/companies?date=${date}`);
   if (!res.ok) return [];
   const json = await res.json();
   return json.data;

@@ -12,6 +12,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/web/node_modules ./packages/web/node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages/web packages/web
+ARG VITE_API_URL=""
+ENV VITE_API_URL=$VITE_API_URL
 RUN pnpm --filter @daily-newsletter/web build
 
 FROM node:22-alpine
