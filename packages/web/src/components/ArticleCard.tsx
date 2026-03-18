@@ -7,6 +7,11 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 
+const SOURCE_COLORS: Record<string, { text: string; bg: string }> = {
+  E24: { text: "text-[var(--color-source-e24)]", bg: "bg-[var(--color-source-e24-bg)]" },
+  "Økonomi24": { text: "text-[var(--color-source-okonomi24)]", bg: "bg-[var(--color-source-okonomi24-bg)]" },
+};
+
 interface ArticleCardProps {
   article: Article;
   index: number;
@@ -15,11 +20,14 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ article, index, onCompanyClick }: ArticleCardProps) {
   const [open, setOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const sourceColor = SOURCE_COLORS[article.sourceName];
 
   return (
     <>
       <article
-        className="group flex cursor-pointer gap-5 border-b border-border-light py-5 animate-slide-up active:bg-surface-raised/50 sm:cursor-default sm:active:bg-transparent"
+        className="group flex cursor-pointer gap-5 border-b border-border-light py-6 animate-slide-up active:bg-surface-raised/50 sm:cursor-default sm:py-5 sm:active:bg-transparent"
         style={{ animationDelay: `${index * 60}ms` }}
         onClick={(e) => {
           // On mobile, open the drawer. On desktop, do nothing (let the link handle it).
@@ -55,7 +63,9 @@ export default function ArticleCard({ article, index, onCompanyClick }: ArticleC
             </p>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <span className="text-xs font-medium text-ink-tertiary">{article.sourceName}</span>
+            <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${sourceColor ? `${sourceColor.bg} ${sourceColor.text}` : "bg-surface-raised text-ink-tertiary"}`}>
+              {article.sourceName}
+            </span>
             {article.publishedAt && (
               <>
                 <span aria-hidden="true" className="text-border">&middot;</span>
@@ -122,26 +132,34 @@ export default function ArticleCard({ article, index, onCompanyClick }: ArticleC
       </article>
 
       {/* Article detail drawer (mobile) */}
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="max-h-[85vh]">
+      <Drawer open={open} onOpenChange={(v) => { setOpen(v); if (!v) setImageLoaded(false); }}>
+        <DrawerContent className="h-[85dvh] border-t-0">
           <DrawerHeader className="sr-only">
             <DrawerTitle>{article.title}</DrawerTitle>
           </DrawerHeader>
 
           <div className="overflow-y-auto px-5 pb-6 pt-4">
             {article.thumbnailUrl && (
-              <img
-                src={article.thumbnailUrl}
-                alt=""
-                className="mb-4 w-full rounded-lg object-cover"
-                style={{ maxHeight: "200px" }}
-              />
+              <div className="relative mb-4 w-full overflow-hidden rounded-lg" style={{ maxHeight: "200px" }}>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 animate-pulse bg-surface-raised" />
+                )}
+                <img
+                  src={article.thumbnailUrl}
+                  alt=""
+                  className={`w-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                  style={{ maxHeight: "200px" }}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              </div>
             )}
 
             <h2 className="font-serif text-2xl leading-snug text-ink">{article.title}</h2>
 
             <div className="mt-2 flex items-center gap-2 text-xs text-ink-tertiary">
-              <span className="font-medium">{article.sourceName}</span>
+              <span className={`inline-flex items-center rounded-md px-2 py-0.5 font-semibold ${sourceColor ? `${sourceColor.bg} ${sourceColor.text}` : "bg-surface-raised text-ink-tertiary"}`}>
+                {article.sourceName}
+              </span>
               {article.publishedAt && (
                 <>
                   <span aria-hidden="true">&middot;</span>

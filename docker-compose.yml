@@ -19,8 +19,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: api
+      dockerfile: Dockerfile.api
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -34,12 +33,11 @@ services:
   worker:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: worker
+      dockerfile: Dockerfile.worker
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       FETCH_CRON: ${FETCH_CRON:-0 6,12,18 * * *}
     depends_on:
       postgres:
@@ -51,7 +49,7 @@ services:
       dockerfile: Dockerfile.web
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
       - api
 
