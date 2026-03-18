@@ -80,13 +80,15 @@ export default function CompanyDetailPage() {
   const isPositive = (quote?.changeIntraDay ?? 0) >= 0;
 
   return (
-    <div className="min-h-screen bg-surface">
+    <>
+      <div className="border-b-2 border-accent" />
+      <div className="min-h-screen bg-surface">
       {/* Topplinje */}
       <header className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <button
             onClick={() => navigate("/companies")}
-            className="p-1 text-ink-secondary hover:text-ink transition-colors"
+            className="p-2 -ml-2 text-ink-secondary hover:text-ink transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
@@ -117,7 +119,7 @@ export default function CompanyDetailPage() {
               <div className="mt-1">
                 <span
                   className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    isPositive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    isPositive ? "bg-accent-subtle text-accent" : "bg-red-50 text-red-700"
                   }`}
                 >
                   {isPositive ? "+" : ""}
@@ -137,6 +139,7 @@ export default function CompanyDetailPage() {
         )}
 
         {/* Nøkkeltall */}
+        {(loadingQuote || quote) && (
         <div className="border-b border-border-light px-4 py-4">
           <h2 className="mb-3 text-sm font-semibold text-ink">Nøkkeltall</h2>
           {loadingQuote ? (
@@ -175,8 +178,10 @@ export default function CompanyDetailPage() {
             </div>
           ) : null}
         </div>
+        )}
 
         {/* Analytikere */}
+        {(loadingQuote || quote) && (
         <div className="border-b border-border-light px-4 py-4">
           <h2 className="mb-3 text-sm font-semibold text-ink">Analytikere</h2>
           {loadingQuote ? (
@@ -223,8 +228,10 @@ export default function CompanyDetailPage() {
             })()
           ) : null}
         </div>
+        )}
 
         {/* Største eiere */}
+        {(loadingQuote || (quote && quote.topOwners.length > 0)) && (
         <div className="border-b border-border-light px-4 py-4">
           <h2 className="mb-3 text-sm font-semibold text-ink">Største eiere</h2>
           {loadingQuote ? (
@@ -247,10 +254,9 @@ export default function CompanyDetailPage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-ink-tertiary">Ingen data</p>
-          )}
+          ) : null}
         </div>
+        )}
 
         {/* Relaterte artikler */}
         <div className="px-4 py-4">
@@ -278,7 +284,7 @@ export default function CompanyDetailPage() {
                     href={a.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-lg border border-border-light bg-surface-raised p-3 transition-colors hover:border-border"
+                    className="block rounded-lg border border-border-light bg-surface-raised p-3 transition-colors hover:border-border active:bg-border-light"
                   >
                     <div className="text-sm font-semibold text-ink">{a.title}</div>
                     <div className="mt-1 flex gap-2 text-xs">
@@ -304,5 +310,6 @@ export default function CompanyDetailPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
