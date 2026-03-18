@@ -140,18 +140,18 @@ app.get("/:ticker/quote", async (c) => {
   }
 
   try {
-    // Try OSE (main exchange) first, fall back to MERK (Euronext Growth)
-    let res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.OSE`, {
-      signal: AbortSignal.timeout(10000),
-    });
+    // Try E24 market suffixes: OSE (main), MERK (Euronext Growth), OAX (Oslo Axess)
+    const suffixes = ["OSE", "MERK", "OAX"];
+    let res: Response | null = null;
 
-    if (!res.ok) {
-      res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.MERK`, {
+    for (const suffix of suffixes) {
+      res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.${suffix}`, {
         signal: AbortSignal.timeout(10000),
       });
+      if (res.ok) break;
     }
 
-    if (!res.ok) {
+    if (!res || !res.ok) {
       return c.json({ error: "Failed to fetch quote data." }, 502);
     }
 
