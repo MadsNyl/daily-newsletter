@@ -47,7 +47,7 @@ export default function CompanyListPage() {
             placeholder="Søk etter selskap..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border-light bg-surface-raised py-2.5 pl-9 pr-4 text-sm text-ink placeholder:text-ink-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full rounded-lg border border-border-light bg-surface-raised py-2.5 pl-9 pr-4 text-base text-ink placeholder:text-ink-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
 
