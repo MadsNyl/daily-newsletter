@@ -19,6 +19,7 @@ export interface Article {
 export interface NewsletterEdition {
   id: string;
   date: string;
+  summary: string | null;
   status: string;
   createdAt: string;
   articles: Article[];

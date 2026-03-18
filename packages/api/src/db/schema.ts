@@ -19,6 +19,7 @@ export const article = pgTable("article", {
 export const newsletterEdition = pgTable("newsletter_edition", {
   id: uuid("id").defaultRandom().primaryKey(),
   date: timestamp("date", { mode: "date" }).notNull().unique(),
+  summary: text("summary"),
   status: editionStatusEnum("status").default("DRAFT").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
