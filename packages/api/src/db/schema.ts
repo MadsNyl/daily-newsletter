@@ -1,4 +1,13 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer, unique, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  pgEnum,
+  integer,
+  unique,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 export const articleStatusEnum = pgEnum("article_status", ["PENDING", "SUMMARIZED", "FAILED"]);
 

@@ -39,9 +39,7 @@ async function main() {
   await boss.work(SUMMARIZE_JOB, async () => {
     console.log("Starting article summarization...");
     const result = await summarizePendingArticles();
-    console.log(
-      `Summarization complete: ${result.summarized} summarized, ${result.failed} failed`,
-    );
+    console.log(`Summarization complete: ${result.summarized} summarized, ${result.failed} failed`);
 
     if (result.summarized > 0) {
       await boss.send(BUILD_EDITION_JOB, {});
