@@ -171,12 +171,10 @@ app.get("/:ticker/quote", async (c) => {
           underweight: extra.underweightRecommendations ?? 0,
           sell: extra.sellRecommendations ?? 0,
         },
-        topOwners: owners.map(
-          (o: { investor: string; percentageOfTotal: number }) => ({
-            investor: o.investor,
-            percentageOfTotal: o.percentageOfTotal,
-          }),
-        ),
+        topOwners: owners.map((o: { investor: string; percentageOfTotal: number }) => ({
+          investor: o.investor,
+          percentageOfTotal: o.percentageOfTotal,
+        })),
       },
     });
   } catch {

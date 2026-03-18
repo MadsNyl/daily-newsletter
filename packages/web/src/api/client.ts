@@ -103,9 +103,7 @@ export async function fetchEditions(
 }
 
 export async function fetchCompanies(date?: string): Promise<Company[]> {
-  const url = date
-    ? `${API_BASE}/api/companies?date=${date}`
-    : `${API_BASE}/api/companies`;
+  const url = date ? `${API_BASE}/api/companies?date=${date}` : `${API_BASE}/api/companies`;
   const res = await fetch(url);
   if (!res.ok) return [];
   const json = await res.json();
@@ -120,9 +118,7 @@ export async function fetchCompanyDetail(
   data: CompanyDetail;
   pagination: { limit: number; offset: number; total: number };
 }> {
-  const res = await fetch(
-    `${API_BASE}/api/companies/${ticker}?limit=${limit}&offset=${offset}`,
-  );
+  const res = await fetch(`${API_BASE}/api/companies/${ticker}?limit=${limit}&offset=${offset}`);
   if (!res.ok) throw new Error(`Failed to fetch company detail: ${res.statusText}`);
   return res.json();
 }

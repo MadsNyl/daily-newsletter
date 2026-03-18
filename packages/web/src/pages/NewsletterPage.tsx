@@ -285,9 +285,7 @@ export default function NewsletterPage() {
             {companies.map((c) => (
               <button
                 key={c.ticker}
-                onClick={() =>
-                  setCompanyFilter(companyFilter === c.ticker ? undefined : c.ticker)
-                }
+                onClick={() => setCompanyFilter(companyFilter === c.ticker ? undefined : c.ticker)}
                 aria-pressed={companyFilter === c.ticker}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   companyFilter === c.ticker
@@ -303,9 +301,7 @@ export default function NewsletterPage() {
         )}
 
         {/* Desktop: Daily summary */}
-        {state.edition?.summary && (
-          <DesktopSummary summary={state.edition.summary} />
-        )}
+        {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />}
 
         {/* Articles */}
         <section id="innhold" aria-label="Artikler" aria-live="polite">

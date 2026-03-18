@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchCompanyChart } from "../api/client";
 
 const RANGES = ["1d", "5d", "1mo", "6mo", "1y", "5y"] as const;
@@ -39,16 +35,25 @@ function formatTimestamp(ts: number, range: string): string {
 }
 
 export default function PriceChart({ ticker }: PriceChartProps) {
-  const [range, setRange] = useState<string>("1d");
+  const [range, _setRange] = useState<string>("1d");
+
+  function setRange(r: string) {
+    _setRange(r);
+    setLoading(true);
+    setError(false);
+  }
   const [data, setData] = useState<ChartPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
-    setLoading(true);
-    setError(false);
+    const id = ++fetchIdRef.current;
+    let cancelled = false;
+
     fetchCompanyChart(ticker, range)
       .then((chart) => {
+        if (cancelled || id !== fetchIdRef.current) return;
         const points: ChartPoint[] = chart.timestamps
           .map((ts, i) => ({
             time: formatTimestamp(ts, range),
@@ -56,9 +61,19 @@ export default function PriceChart({ ticker }: PriceChartProps) {
           }))
           .filter((p) => p.price != null);
         setData(points);
+        setError(false);
+        setLoading(false);
       })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled && id === fetchIdRef.current) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [ticker, range]);
 
   const chartConfig = {

@@ -142,7 +142,10 @@ export default function CompanyDetailPage() {
           {loadingQuote ? (
             <div className="grid grid-cols-2 gap-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="rounded-lg border border-border-light bg-surface-raised p-3">
+                <div
+                  key={i}
+                  className="rounded-lg border border-border-light bg-surface-raised p-3"
+                >
                   <Skeleton className="h-2.5 w-16 mb-2" />
                   <Skeleton className="h-4 w-20" />
                 </div>
@@ -185,8 +188,7 @@ export default function CompanyDetailPage() {
             (() => {
               const a = quote.analysts;
               const total = a.buy + a.overweight + a.hold + a.underweight + a.sell;
-              if (total === 0)
-                return <p className="text-sm text-ink-tertiary">Ingen data</p>;
+              if (total === 0) return <p className="text-sm text-ink-tertiary">Ingen data</p>;
               const segments = [
                 { count: a.buy, bg: "bg-green-600", text: "text-white" },
                 { count: a.overweight, bg: "bg-green-300", text: "text-green-900" },
@@ -238,10 +240,7 @@ export default function CompanyDetailPage() {
           ) : quote && quote.topOwners.length > 0 ? (
             <div className="space-y-2">
               {quote.topOwners.map((o) => (
-                <div
-                  key={o.investor}
-                  className="flex items-center justify-between text-sm"
-                >
+                <div key={o.investor} className="flex items-center justify-between text-sm">
                   <span className="text-ink">{o.investor}</span>
                   <span className="font-semibold text-ink-secondary">
                     {o.percentageOfTotal.toFixed(1)}%

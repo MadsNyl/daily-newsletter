@@ -105,14 +105,22 @@ describe("GET /companies/:ticker", () => {
   it("returns company with articles", async () => {
     const fakeCompany = { id: "c-1", ticker: "DNB", name: "DNB Bank ASA" };
     const fakeArticles = [
-      { id: "a-1", title: "DNB Q4", summary: "Good results", sourceUrl: "https://e24.no/1", sourceName: "E24", thumbnailUrl: null, publishedAt: "2026-03-15" },
+      {
+        id: "a-1",
+        title: "DNB Q4",
+        summary: "Good results",
+        sourceUrl: "https://e24.no/1",
+        sourceName: "E24",
+        thumbnailUrl: null,
+        publishedAt: "2026-03-15",
+      },
     ];
 
     let selectCallCount = 0;
     vi.mocked(db.select).mockImplementation(() => {
       const results = [
-        [fakeCompany],  // company lookup
-        fakeArticles,   // articles query
+        [fakeCompany], // company lookup
+        fakeArticles, // articles query
         [{ count: 1 }], // count query
       ];
       const result = results[selectCallCount] ?? [];

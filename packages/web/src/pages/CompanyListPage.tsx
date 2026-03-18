@@ -80,9 +80,7 @@ export default function CompanyListPage() {
               </button>
             ))}
             {filtered.length === 0 && (
-              <p className="py-8 text-center text-sm text-ink-tertiary">
-                Ingen selskaper funnet
-              </p>
+              <p className="py-8 text-center text-sm text-ink-tertiary">Ingen selskaper funnet</p>
             )}
           </div>
         )}
