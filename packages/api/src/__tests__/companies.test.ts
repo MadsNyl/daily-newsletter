@@ -33,11 +33,17 @@ describe("GET /companies", () => {
     vi.mocked(db.selectDistinct).mockImplementation(() => makeSelectChain() as any); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
-  it("returns 400 when date param is missing", async () => {
+  it("returns all active companies when date param is missing", async () => {
+    const fakeCompanies = [
+      { ticker: "DNB", name: "DNB Bank ASA" },
+      { ticker: "EQNR", name: "Equinor ASA" },
+    ];
+    vi.mocked(db.select).mockImplementation(() => makeSelectChain(fakeCompanies) as any); // eslint-disable-line @typescript-eslint/no-explicit-any
     const res = await app.request("/companies");
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toHaveProperty("error");
+    expect(body).toHaveProperty("data");
+    expect(Array.isArray(body.data)).toBe(true);
   });
 
   it("returns 400 for invalid date format", async () => {
