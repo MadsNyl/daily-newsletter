@@ -25,9 +25,14 @@ export function parseTickers(item: Record<string, unknown>): string[] {
   const companies = item.companies as Record<string, unknown> | undefined;
   if (!companies?.company) return [];
   const raw = companies.company;
-  if (Array.isArray(raw)) return raw.filter((t): t is string => typeof t === "string");
-  if (typeof raw === "string") return [raw];
-  return [];
+  let tickers: string[];
+  if (Array.isArray(raw)) tickers = raw.filter((t): t is string => typeof t === "string");
+  else if (typeof raw === "string") tickers = [raw];
+  else return [];
+
+  return tickers
+    .filter((t) => t.endsWith(".OSE"))
+    .map((t) => t.slice(0, -4));
 }
 
 function extractThumbnail(item: Parser.Item): string | null {
