@@ -6,6 +6,7 @@ import ArticleCard from "../components/ArticleCard";
 import DateDrawer from "../components/DateDrawer";
 import CompanyDrawer from "../components/CompanyDrawer";
 import SummaryDrawer from "../components/SummaryDrawer";
+import NavigationDrawer from "../components/NavigationDrawer";
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -194,9 +195,14 @@ export default function NewsletterPage() {
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
-          <h1 className="font-serif text-3xl text-center tracking-tight text-ink sm:text-5xl">
-            Daglig Nyhetsbrev
-          </h1>
+          <div className="flex items-center gap-3 sm:justify-center">
+            <div className="sm:hidden">
+              <NavigationDrawer />
+            </div>
+            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
+              Daglig Nyhetsbrev
+            </h1>
+          </div>
         </header>
 
         {/* Mobile: Date drawer + Company drawer */}
