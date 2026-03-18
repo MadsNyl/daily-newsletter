@@ -6,6 +6,7 @@ import ArticleCard from "../components/ArticleCard";
 import DateDrawer from "../components/DateDrawer";
 import CompanyDrawer from "../components/CompanyDrawer";
 import SummaryDrawer from "../components/SummaryDrawer";
+import NavigationDrawer from "../components/NavigationDrawer";
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -194,9 +195,12 @@ export default function NewsletterPage() {
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
-          <h1 className="font-serif text-3xl text-center tracking-tight text-ink sm:text-5xl">
-            Daglig Nyhetsbrev
-          </h1>
+          <div className="flex items-center gap-3 sm:justify-center">
+            <NavigationDrawer />
+            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
+              Daglig Nyhetsbrev
+            </h1>
+          </div>
         </header>
 
         {/* Mobile: Date drawer + Company drawer */}
@@ -279,9 +283,7 @@ export default function NewsletterPage() {
             {companies.map((c) => (
               <button
                 key={c.ticker}
-                onClick={() =>
-                  setCompanyFilter(companyFilter === c.ticker ? undefined : c.ticker)
-                }
+                onClick={() => setCompanyFilter(companyFilter === c.ticker ? undefined : c.ticker)}
                 aria-pressed={companyFilter === c.ticker}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   companyFilter === c.ticker
@@ -297,9 +299,7 @@ export default function NewsletterPage() {
         )}
 
         {/* Desktop: Daily summary */}
-        {state.edition?.summary && (
-          <DesktopSummary summary={state.edition.summary} />
-        )}
+        {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />}
 
         {/* Articles */}
         <section id="innhold" aria-label="Artikler" aria-live="polite">

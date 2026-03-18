@@ -33,11 +33,17 @@ describe("GET /companies", () => {
     vi.mocked(db.selectDistinct).mockImplementation(() => makeSelectChain() as any); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
-  it("returns 400 when date param is missing", async () => {
+  it("returns all active companies when date param is missing", async () => {
+    const fakeCompanies = [
+      { ticker: "DNB", name: "DNB Bank ASA" },
+      { ticker: "EQNR", name: "Equinor ASA" },
+    ];
+    vi.mocked(db.select).mockImplementation(() => makeSelectChain(fakeCompanies) as any); // eslint-disable-line @typescript-eslint/no-explicit-any
     const res = await app.request("/companies");
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toHaveProperty("error");
+    expect(body).toHaveProperty("data");
+    expect(Array.isArray(body.data)).toBe(true);
   });
 
   it("returns 400 for invalid date format", async () => {
@@ -79,5 +85,71 @@ describe("GET /companies", () => {
     const body = await res.json();
     expect(body).toHaveProperty("data");
     expect(Array.isArray(body.data)).toBe(true);
+  });
+});
+
+describe("GET /companies/:ticker", () => {
+  beforeEach(() => {
+    vi.mocked(db.select).mockImplementation(() => makeSelectChain() as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    vi.mocked(db.selectDistinct).mockImplementation(() => makeSelectChain() as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  });
+
+  it("returns 404 for unknown ticker", async () => {
+    vi.mocked(db.select).mockImplementation(() => makeSelectChain([]) as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const res = await app.request("/companies/UNKNOWN");
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body).toHaveProperty("error");
+  });
+
+  it("returns company with articles", async () => {
+    const fakeCompany = { id: "c-1", ticker: "DNB", name: "DNB Bank ASA" };
+    const fakeArticles = [
+      {
+        id: "a-1",
+        title: "DNB Q4",
+        summary: "Good results",
+        sourceUrl: "https://e24.no/1",
+        sourceName: "E24",
+        thumbnailUrl: null,
+        publishedAt: "2026-03-15",
+      },
+    ];
+
+    let selectCallCount = 0;
+    vi.mocked(db.select).mockImplementation(() => {
+      const results = [
+        [fakeCompany], // company lookup
+        fakeArticles, // articles query
+        [{ count: 1 }], // count query
+      ];
+      const result = results[selectCallCount] ?? [];
+      selectCallCount++;
+      return makeSelectChain(result) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    });
+
+    const res = await app.request("/companies/DNB");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data).toHaveProperty("ticker", "DNB");
+    expect(body.data).toHaveProperty("articles");
+    expect(body).toHaveProperty("pagination");
+  });
+
+  it("respects limit param", async () => {
+    const fakeCompany = { id: "c-1", ticker: "DNB", name: "DNB Bank ASA" };
+
+    let selectCallCount = 0;
+    vi.mocked(db.select).mockImplementation(() => {
+      const results = [[fakeCompany], [], [{ count: 0 }]];
+      const result = results[selectCallCount] ?? [];
+      selectCallCount++;
+      return makeSelectChain(result) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    });
+
+    const res = await app.request("/companies/DNB?limit=5");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.pagination.limit).toBe(5);
   });
 });
