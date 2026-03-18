@@ -26,16 +26,22 @@ export default function CompanyListPage() {
     : companies;
 
   return (
-    <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
-          <NavigationDrawer />
-          <h1 className="text-lg font-semibold text-ink">Aksjer</h1>
-        </div>
-      </header>
+    <>
+      <div className="border-b-2 border-accent" />
 
-      <div className="mx-auto max-w-2xl px-4 py-4">
+      <div className="min-h-screen bg-surface">
+        <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
+          {/* Header */}
+          <header className="mb-6 animate-fade-in sm:mb-10">
+            <div className="flex items-center gap-3 sm:justify-center">
+              <NavigationDrawer />
+              <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
+                Aksjer
+              </h1>
+            </div>
+          </header>
+
+          <div className="mx-auto max-w-2xl">
         {/* Search */}
         <div className="relative mb-4">
           <Search
@@ -84,7 +90,9 @@ export default function CompanyListPage() {
             )}
           </div>
         )}
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 }
