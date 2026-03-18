@@ -126,4 +126,123 @@ app.get("/:ticker", async (c) => {
   });
 });
 
+app.get("/:ticker/quote", async (c) => {
+  const ticker = c.req.param("ticker").toUpperCase();
+
+  const [found] = await db
+    .select({ ticker: company.ticker })
+    .from(company)
+    .where(eq(company.ticker, ticker))
+    .limit(1);
+
+  if (!found) {
+    return c.json({ error: "Company not found." }, 404);
+  }
+
+  try {
+    const res = await fetch(`https://api.e24.no/bors/v2/instruments/${ticker}.OSE`, {
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) {
+      return c.json({ error: "Failed to fetch quote data." }, 502);
+    }
+
+    const json = await res.json();
+    const t = json.ticker ?? {};
+    const extra = json.tickerExtra ?? {};
+    const owners = (json.topOwners ?? []).slice(0, 5);
+
+    return c.json({
+      data: {
+        price: t.value ?? null,
+        currency: t.currency ?? "NOK",
+        changeIntraDay: t.changeIntraDay ?? null,
+        changePctIntraDay: t.changePctIntraDay ?? null,
+        high: t.high ?? null,
+        low: t.low ?? null,
+        volume: t.volume ?? null,
+        marketCap: t.marketCap ?? null,
+        peValue: t.peValue ?? null,
+        analysts: {
+          buy: extra.buyRecommendations ?? 0,
+          overweight: extra.overweightRecommendations ?? 0,
+          hold: extra.holdRecommendations ?? 0,
+          underweight: extra.underweightRecommendations ?? 0,
+          sell: extra.sellRecommendations ?? 0,
+        },
+        topOwners: owners.map(
+          (o: { investor: string; percentageOfTotal: number }) => ({
+            investor: o.investor,
+            percentageOfTotal: o.percentageOfTotal,
+          }),
+        ),
+      },
+    });
+  } catch {
+    return c.json({ error: "Failed to fetch quote data." }, 502);
+  }
+});
+
+const RANGE_INTERVAL_MAP: Record<string, string> = {
+  "1d": "5m",
+  "5d": "15m",
+  "1mo": "1d",
+  "6mo": "1d",
+  "1y": "1d",
+  "5y": "1wk",
+};
+
+const rangeSchema = z.enum(["1d", "5d", "1mo", "6mo", "1y", "5y"]).default("1d");
+
+app.get("/:ticker/chart", async (c) => {
+  const ticker = c.req.param("ticker").toUpperCase();
+
+  const [found] = await db
+    .select({ ticker: company.ticker })
+    .from(company)
+    .where(eq(company.ticker, ticker))
+    .limit(1);
+
+  if (!found) {
+    return c.json({ error: "Company not found." }, 404);
+  }
+
+  const rangeParsed = rangeSchema.safeParse(c.req.query("range"));
+  const range = rangeParsed.success ? rangeParsed.data : "1d";
+  const interval = RANGE_INTERVAL_MAP[range];
+
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}.OL?range=${range}&interval=${interval}`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) {
+      return c.json({ error: "Failed to fetch chart data." }, 502);
+    }
+
+    const json = await res.json();
+    const result = json.chart?.result?.[0];
+
+    if (!result) {
+      return c.json({ error: "No chart data available." }, 502);
+    }
+
+    const timestamps: number[] = result.timestamp ?? [];
+    const closes: number[] = result.indicators?.quote?.[0]?.close ?? [];
+    const volumes: number[] = result.indicators?.quote?.[0]?.volume ?? [];
+
+    return c.json({
+      data: {
+        timestamps,
+        close: closes,
+        volume: volumes,
+      },
+    });
+  } catch {
+    return c.json({ error: "Failed to fetch chart data." }, 502);
+  }
+});
+
 export default app;
