@@ -3,9 +3,11 @@ import PgBoss from "pg-boss";
 import { fetchArticles } from "./article-fetcher.js";
 import { summarizePendingArticles } from "./article-summarizer.js";
 import { buildEdition } from "./edition-builder.js";
+import { summarizeEdition } from "./edition-summarizer.js";
 const FETCH_JOB = "article-fetch";
 const SUMMARIZE_JOB = "article-summarize";
 const BUILD_EDITION_JOB = "edition-build";
+const SUMMARIZE_EDITION_JOB = "edition-summarize";
 
 async function main() {
   const boss = new PgBoss(config.databaseUrl);
@@ -18,6 +20,7 @@ async function main() {
   await boss.createQueue(FETCH_JOB);
   await boss.createQueue(SUMMARIZE_JOB);
   await boss.createQueue(BUILD_EDITION_JOB);
+  await boss.createQueue(SUMMARIZE_EDITION_JOB);
 
   await boss.work(FETCH_JOB, async () => {
     console.log("Starting article fetch...");
@@ -47,6 +50,17 @@ async function main() {
     console.log("Starting edition build...");
     const result = await buildEdition();
     console.log(`Edition build complete: ${result.date}, ${result.articleCount} articles`);
+
+    if (result.articleCount > 0) {
+      await boss.send(SUMMARIZE_EDITION_JOB, {});
+      console.log("Queued edition-summarize job");
+    }
+  });
+
+  await boss.work(SUMMARIZE_EDITION_JOB, async () => {
+    console.log("Starting edition summarize...");
+    const result = await summarizeEdition();
+    console.log(`Edition summarize complete: ${result.date}, updated: ${result.updated}`);
   });
 
   await boss.schedule(FETCH_JOB, config.fetchCron, { retryLimit: 3, retryDelay: 60 });
