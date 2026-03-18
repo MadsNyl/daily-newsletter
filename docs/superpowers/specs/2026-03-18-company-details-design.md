@@ -10,10 +10,14 @@ A mobile-first company browsing experience: a hamburger drawer menu for navigati
 |--------|------------|------|
 | Our API | `GET /api/companies` (no date param) | All active companies (list page) |
 | Our API | `GET /api/companies/:ticker` | Company info + related articles |
-| E24 API | `GET https://api.e24.no/bors/v2/instruments/{TICKER}.OSE` | Price, metrics, analysts, owners |
-| Yahoo Finance | `GET https://query1.finance.yahoo.com/v8/finance/chart/{TICKER}.OL?range={range}&interval={interval}` | OHLCV time-series for chart |
+| Our API | `GET /api/companies/:ticker/quote` | Proxied E24 data (price, metrics, analysts, owners) |
+| Our API | `GET /api/companies/:ticker/chart?range=1d` | Proxied Yahoo Finance OHLCV time-series |
 
-E24 and Yahoo Finance are fetched directly from the frontend (no backend proxy).
+E24 and Yahoo Finance are proxied through the backend to avoid CORS issues. The backend fetches from:
+- E24: `https://api.e24.no/bors/v2/instruments/{TICKER}.OSE`
+- Yahoo: `https://query1.finance.yahoo.com/v8/finance/chart/{TICKER}.OL?range={range}&interval={interval}`
+
+The ticker suffix mapping is hardcoded: `.OSE` for E24, `.OL` for Yahoo Finance. This is sufficient since all companies in our DB are Oslo Bors (`exchange = "OSL"`).
 
 ### Yahoo Finance Range/Interval Mapping
 
@@ -63,11 +67,60 @@ Query: join `company` → `articleCompany` → `article`, filter by `company.tic
 
 Returns 404 if ticker not found.
 
+Only includes articles with `status = 'SUMMARIZED'` (pending/failed articles have no useful summary).
+
+Default pagination: `limit = 20`, `offset = 0`. Maximum `limit = 100`.
+
+### New `GET /api/companies/:ticker/quote`
+
+Proxies E24 instrument data. Fetches from `https://api.e24.no/bors/v2/instruments/{TICKER}.OSE` and returns a shaped response:
+
+```json
+{
+  "data": {
+    "price": 296.8,
+    "currency": "NOK",
+    "changeIntraDay": 4.3,
+    "changePctIntraDay": 1.47,
+    "high": 297.8,
+    "low": 292.9,
+    "volume": 2272974,
+    "marketCap": 438553150000,
+    "peValue": 8.56,
+    "analysts": {
+      "buy": 5, "overweight": 1, "hold": 11, "underweight": 1, "sell": 3
+    },
+    "topOwners": [
+      { "investor": "NÆRINGS- OG FISKERIDEPARTEMENTET", "percentageOfTotal": 34.0 }
+    ]
+  }
+}
+```
+
+Returns 502 if E24 is unreachable. Returns 404 if ticker not found in our DB.
+
+### New `GET /api/companies/:ticker/chart`
+
+Proxies Yahoo Finance chart data. Accepts `range` query param (one of: `1d`, `5d`, `1mo`, `6mo`, `1y`, `5y`; default `1d`). Returns the OHLCV time-series:
+
+```json
+{
+  "data": {
+    "timestamps": [1773820800, ...],
+    "close": [294.3, ...],
+    "volume": [14802, ...]
+  }
+}
+```
+
+Returns only timestamps and close prices (sufficient for an area chart). Returns 502 if Yahoo is unreachable.
+
 ### Tests
 
 Extend `packages/api/src/__tests__/companies.test.ts` using the existing `makeSelectChain` mock pattern:
 
 - `GET /companies` (no date): returns all active companies
+- `GET /companies` (no date, missing date param): update existing test that expects 400 — now returns 200 with companies
 - `GET /companies/:ticker`: returns company + articles
 - `GET /companies/:ticker`: returns 404 for unknown ticker
 - `GET /companies/:ticker?limit=5`: respects pagination params
@@ -110,11 +163,11 @@ Layout from top to bottom:
 
 1. **Header** — back arrow (navigates to `/companies`), ticker, company name
 2. **Price hero** — current price in NOK, daily change as green/red badge
-3. **Chart** — area chart (shadcn/recharts) with range selector buttons (1D, 5D, 1M, 6M, 1Y, 5Y). Default range: 1D. Fetches from Yahoo Finance on range change.
-4. **Key metrics** — 2x2 grid: market cap, P/E ratio, volume, high/low. From E24 ticker data.
-5. **Analyst recommendations** — horizontal stacked bar showing buy/overweight/hold/underweight/sell counts. From E24 tickerExtra data.
-6. **Top owners** — top 5 shareholders with percentage. From E24 topOwners data.
-7. **Related articles** — cards with title, source badge, date. From our API. Tap opens source URL. Paginated with "Load more" button.
+3. **Chart** — area chart (shadcn/recharts) with range selector buttons (1D, 5D, 1M, 6M, 1Y, 5Y). Default range: 1D. Fetches from `GET /api/companies/:ticker/chart?range=` on range change.
+4. **Key metrics** — 2x2 grid: market cap, P/E ratio, volume, high/low. From `GET /api/companies/:ticker/quote`.
+5. **Analyst recommendations** — horizontal stacked bar showing buy/overweight/hold/underweight/sell counts. From quote endpoint.
+6. **Top owners** — top 5 shareholders with percentage. From quote endpoint.
+7. **Related articles** — cards with title, source badge, date. From `GET /api/companies/:ticker`. Tap opens source URL. Paginated with "Load more" button.
 
 Each data source loads independently — the page shows skeleton placeholders that fill in as data arrives.
 
@@ -123,8 +176,10 @@ Each data source loads independently — the page shows skeleton placeholders th
 In `api/client.ts`:
 
 ```typescript
-fetchAllCompanies(): Promise<Company[]>
+fetchCompanies(date?: string): Promise<Company[]>  // extend existing — date is now optional
 fetchCompanyDetail(ticker: string, limit?: number, offset?: number): Promise<CompanyDetail>
+fetchCompanyQuote(ticker: string): Promise<CompanyQuote>
+fetchCompanyChart(ticker: string, range: string): Promise<ChartData>
 ```
 
 ### Price Chart Component
@@ -133,7 +188,7 @@ New component: `components/PriceChart.tsx`
 
 - Accepts `ticker` prop
 - Manages selected range state (default: "1d")
-- Fetches Yahoo Finance data on mount and range change
+- Fetches from `/api/companies/:ticker/chart?range=` on mount and range change
 - Renders an area chart using shadcn chart components (Recharts)
 - Range selector as a row of pill buttons below the header
 - Shows loading spinner during fetch
@@ -148,10 +203,10 @@ New component: `components/PriceChart.tsx`
 
 | File | Change |
 |------|--------|
-| `packages/api/src/routes/companies.ts` | Extend GET / (no date), add GET /:ticker |
-| `packages/api/src/__tests__/companies.test.ts` | Add tests for new endpoints |
+| `packages/api/src/routes/companies.ts` | Extend GET / (no date), add GET /:ticker, /:ticker/quote, /:ticker/chart |
+| `packages/api/src/__tests__/companies.test.ts` | Update existing test, add tests for new endpoints |
 | `packages/web/src/App.tsx` | Add /companies and /companies/:ticker routes |
-| `packages/web/src/api/client.ts` | Add fetchAllCompanies, fetchCompanyDetail |
+| `packages/web/src/api/client.ts` | Extend fetchCompanies (optional date), add fetchCompanyDetail, fetchCompanyQuote, fetchCompanyChart |
 | `packages/web/src/pages/CompanyListPage.tsx` | New — searchable company list |
 | `packages/web/src/pages/CompanyDetailPage.tsx` | New — company detail with chart, metrics, articles |
 | `packages/web/src/pages/NewsletterPage.tsx` | Add NavigationDrawer to header |
@@ -160,8 +215,8 @@ New component: `components/PriceChart.tsx`
 
 ## Out of Scope
 
-- Backend proxy for E24/Yahoo data
-- Price data caching
+- Price data caching (server-side)
 - Real-time/websocket price updates
 - Desktop-specific layouts (mobile-first, responsive enough for desktop)
 - Finance calendar or stock notices from E24
+- Other exchanges beyond Oslo Bors
