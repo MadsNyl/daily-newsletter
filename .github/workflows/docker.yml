@@ -1,0 +1,26 @@
+name: Docker Build
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: api
+            dockerfile: Dockerfile.api
+          - service: worker
+            dockerfile: Dockerfile.worker
+          - service: web
+            dockerfile: Dockerfile.web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f ${{ matrix.dockerfile }} -t daily-newsletter-${{ matrix.service }}:test .

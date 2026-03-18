@@ -194,12 +194,9 @@ export default function NewsletterPage() {
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
-          <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl">
+          <h1 className="font-serif text-3xl text-center tracking-tight text-ink sm:text-5xl">
             Daglig Nyhetsbrev
           </h1>
-          <p className="mt-1 text-sm text-ink-tertiary sm:mt-2">
-            Norske nyheter for finansprofesjonelle, oppsummert daglig.
-          </p>
         </header>
 
         {/* Mobile: Date drawer + Company drawer */}

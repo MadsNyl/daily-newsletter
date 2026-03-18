@@ -54,7 +54,7 @@ export default function SummaryDrawer({ summary }: SummaryDrawerProps) {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="h-[85dvh] border-t-0">
         <DrawerHeader>
           <DrawerTitle className="font-serif text-lg">Dagens oppsummering</DrawerTitle>
         </DrawerHeader>

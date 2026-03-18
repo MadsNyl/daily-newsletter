@@ -55,7 +55,7 @@ Article sources are configured in `src/feeds.ts` (RSS) and `src/scrapers/` (web 
 
 ## Environment Variables
 
-See `.env.example`. Required: `DATABASE_URL`, `ANTHROPIC_API_KEY`. The worker needs both; the API only needs `DATABASE_URL`.
+See `.env.example`. Required: `DATABASE_URL`, `OPENROUTER_API_KEY`. The worker needs both; the API only needs `DATABASE_URL`.
 
 ## Code Style
 

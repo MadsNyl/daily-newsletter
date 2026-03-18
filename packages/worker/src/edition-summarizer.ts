@@ -65,7 +65,7 @@ export async function summarizeEdition(): Promise<{ date: string; updated: boole
   }
 
   const response = await client.chat.completions.create({
-    model: "anthropic/claude-haiku-4.5",
+    model: "openai/gpt-4.1-mini",
     max_tokens: 1024,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
