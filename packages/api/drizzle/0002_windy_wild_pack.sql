@@ -1,0 +1,1 @@
+ALTER TABLE "newsletter_edition" ADD COLUMN "summary" text;

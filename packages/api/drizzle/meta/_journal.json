@@ -15,6 +15,13 @@
       "when": 1773763248136,
       "tag": "0001_brief_shriek",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773855384817,
+      "tag": "0002_windy_wild_pack",
+      "breakpoints": true
     }
   ]
 }
