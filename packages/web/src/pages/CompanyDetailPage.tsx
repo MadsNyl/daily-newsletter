@@ -119,7 +119,7 @@ export default function CompanyDetailPage() {
               <div className="mt-1">
                 <span
                   className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    isPositive ? "bg-accent-subtle text-accent" : "bg-red-50 text-red-700"
+                    isPositive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
                   }`}
                 >
                   {isPositive ? "+" : ""}
