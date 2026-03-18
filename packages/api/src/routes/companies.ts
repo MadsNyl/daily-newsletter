@@ -70,4 +70,60 @@ app.get("/", async (c) => {
   return c.json({ data: companies });
 });
 
+const paginationSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+app.get("/:ticker", async (c) => {
+  const ticker = c.req.param("ticker").toUpperCase();
+
+  const [found] = await db
+    .select({ id: company.id, ticker: company.ticker, name: company.name })
+    .from(company)
+    .where(eq(company.ticker, ticker))
+    .limit(1);
+
+  if (!found) {
+    return c.json({ error: "Company not found." }, 404);
+  }
+
+  const parsed = paginationSchema.safeParse(c.req.query());
+  const { limit, offset } = parsed.success ? parsed.data : { limit: 20, offset: 0 };
+
+  const articles = await db
+    .select({
+      id: article.id,
+      title: article.title,
+      summary: article.summary,
+      sourceUrl: article.sourceUrl,
+      sourceName: article.sourceName,
+      thumbnailUrl: article.thumbnailUrl,
+      publishedAt: article.publishedAt,
+    })
+    .from(articleCompany)
+    .innerJoin(article, eq(articleCompany.articleId, article.id))
+    .where(and(eq(articleCompany.companyId, found.id), eq(article.status, "SUMMARIZED")))
+    .orderBy(desc(article.publishedAt))
+    .limit(limit)
+    .offset(offset);
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(articleCompany)
+    .innerJoin(article, eq(articleCompany.articleId, article.id))
+    .where(and(eq(articleCompany.companyId, found.id), eq(article.status, "SUMMARIZED")));
+
+  const total = countResult?.count ?? 0;
+
+  return c.json({
+    data: {
+      ticker: found.ticker,
+      name: found.name,
+      articles,
+    },
+    pagination: { limit, offset, total },
+  });
+});
+
 export default app;
