@@ -1,10 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { db } from "./db/index.js";
 import { article, newsletterEdition, editionArticle } from "./db/schema.js";
 import { eq, asc } from "drizzle-orm";
 import { config } from "./config.js";
 
-const client = new Anthropic({ apiKey: config.anthropicApiKey });
+const client = new OpenAI({
+  apiKey: config.openrouterApiKey,
+  baseURL: "https://openrouter.ai/api/v1",
+});
 
 const SYSTEM_PROMPT = `Du er en norsk nyhetsredaktør som skriver daglige oppsummeringer av nyhetsbrevet. Skriv en oppsummering i markdown-format som gir leseren et raskt overblikk over dagens viktigste nyheter. Bruk en profesjonell og nøytral tone. Strukturer oppsummeringen med korte avsnitt. Skriv på norsk.`;
 
@@ -12,7 +15,10 @@ function buildArticleList(
   articles: Array<{ title: string; summary: string | null; sourceName: string }>,
 ): string {
   return articles
-    .map((a, i) => `${i + 1}. **${a.title}** (${a.sourceName})${a.summary ? `\n   ${a.summary}` : ""}`)
+    .map(
+      (a, i) =>
+        `${i + 1}. **${a.title}** (${a.sourceName})${a.summary ? `\n   ${a.summary}` : ""}`,
+    )
     .join("\n");
 }
 
@@ -51,33 +57,26 @@ export async function summarizeEdition(): Promise<{ date: string; updated: boole
 
   const articleList = buildArticleList(editionArticles);
 
-  const messages: Anthropic.MessageParam[] = [];
-
+  let userMessage: string;
   if (edition.summary) {
-    messages.push({
-      role: "user",
-      content: `Her er den eksisterende oppsummeringen av dagens nyhetsbrev:\n\n${edition.summary}\n\nHer er den oppdaterte listen med alle dagens artikler:\n\n${articleList}\n\nOppdater oppsummeringen slik at den dekker alle artiklene. Behold relevant innhold fra den eksisterende oppsummeringen, men legg til nye artikler og fjern artikler som ikke lenger er med. Svar kun med den oppdaterte oppsummeringen i markdown-format.`,
-    });
+    userMessage = `Her er den eksisterende oppsummeringen av dagens nyhetsbrev:\n\n${edition.summary}\n\nHer er den oppdaterte listen med alle dagens artikler:\n\n${articleList}\n\nOppdater oppsummeringen slik at den dekker alle artiklene. Behold relevant innhold fra den eksisterende oppsummeringen, men legg til nye artikler og fjern artikler som ikke lenger er med. Svar kun med den oppdaterte oppsummeringen i markdown-format.`;
   } else {
-    messages.push({
-      role: "user",
-      content: `Her er dagens artikler i nyhetsbrevet:\n\n${articleList}\n\nSkriv en oppsummering av dagens nyhetsbrev i markdown-format. Svar kun med oppsummeringen.`,
-    });
+    userMessage = `Her er dagens artikler i nyhetsbrevet:\n\n${articleList}\n\nSkriv en oppsummering av dagens nyhetsbrev i markdown-format. Svar kun med oppsummeringen.`;
   }
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+  const response = await client.chat.completions.create({
+    model: "anthropic/claude-haiku-4.5",
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userMessage },
+    ],
   });
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    throw new Error("Empty response from Claude");
+  const summary = response.choices[0]?.message?.content;
+  if (!summary) {
+    throw new Error("Empty response from OpenRouter");
   }
-
-  const summary = textBlock.text;
 
   await db
     .update(newsletterEdition)

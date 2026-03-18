@@ -148,4 +148,15 @@ app.post("/trigger", async (c) => {
   return c.json({ message: "Newsletter pipeline triggered", jobId }, 201);
 });
 
+app.post("/trigger-summary", async (c) => {
+  const queue = await getQueue();
+  const jobId = await queue.send("edition-summarize", {}, { retryLimit: 3, retryDelay: 60 });
+
+  if (!jobId) {
+    return c.json({ error: "Failed to queue job. A job may already be pending." }, 409);
+  }
+
+  return c.json({ message: "Edition summarize triggered", jobId }, 201);
+});
+
 export default app;
