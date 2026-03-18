@@ -135,11 +135,12 @@ export default function PriceChart({ ticker }: PriceChartProps) {
             <YAxis
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={4}
               fontSize={10}
               stroke="var(--color-ink-tertiary)"
               domain={["dataMin", "dataMax"]}
-              width={45}
+              width={50}
+              tickFormatter={(v: number) => v.toFixed(1)}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area
