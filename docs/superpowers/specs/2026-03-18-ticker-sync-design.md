@@ -6,13 +6,13 @@ A daily pg-boss job that scrapes the current list of Oslo Bors tickers from Stoc
 
 ## Schema Changes
 
-Extend the `company` table with three new nullable columns (both `packages/api/src/db/schema.ts` and `packages/worker/src/db/schema.ts`):
+Extend the `company` table with three new columns (both `packages/api/src/db/schema.ts` and `packages/worker/src/db/schema.ts`):
 
-| Column       | Type                       | Default | Notes                          |
-| ------------ | -------------------------- | ------- | ------------------------------ |
-| `exchange`   | `text`                     | `null`  | e.g. `"OSL"`                   |
-| `lastSeenAt` | `timestamp with time zone` | `null`  | Updated on every sync run      |
-| `isActive`   | `boolean`                  | `true`  | Set to `false` if delisted     |
+| Column       | Type                       | Nullable | Default | Notes                          |
+| ------------ | -------------------------- | -------- | ------- | ------------------------------ |
+| `exchange`   | `text`                     | yes      | `null`  | e.g. `"OSL"`                   |
+| `lastSeenAt` | `timestamp with time zone` | yes      | `null`  | Updated on every sync run      |
+| `isActive`   | `boolean`                  | no       | `true`  | Set to `false` if delisted     |
 
 Existing rows (created by `resolveCompany()`) get `null` exchange, `null` lastSeenAt, and `true` isActive. No breaking changes.
 
@@ -28,11 +28,12 @@ New file: `packages/worker/src/ticker-sync.ts`
 2. Extract ticker/company pairs via regex: `{no:\d+,s:"osl\/([^"]+)",n:"([^"]+)"`.
 3. **Guard:** Throw if fewer than 100 tickers extracted (scraper breakage detection). No DB writes happen.
 4. Record the current timestamp as `syncTimestamp`.
-5. For each scraped ticker, upsert into the `company` table:
-   - **Insert** if new: `ticker`, `name`, `exchange: "OSL"`, `isActive: true`, `lastSeenAt: syncTimestamp`.
-   - **On conflict** (ticker): update `lastSeenAt: syncTimestamp`, `name`, `isActive: true`.
-6. After all upserts: set `isActive = false` for companies where `exchange = "OSL"` AND `lastSeenAt < syncTimestamp`.
-7. Return `{ total: number, inserted: number, deactivated: number }`.
+5. Inside a single database transaction:
+   a. Batch upsert all scraped tickers into the `company` table (single query with `.values([...])` + `.onConflictDoUpdate`):
+      - **Insert** if new: `ticker`, `name`, `exchange: "OSL"`, `isActive: true`, `lastSeenAt: syncTimestamp`.
+      - **On conflict** (ticker): update `lastSeenAt: syncTimestamp`, `name`, `isActive: true`.
+   b. Set `isActive = false` for companies where `exchange = "OSL"` AND `lastSeenAt < syncTimestamp`.
+6. Return `{ total: number, upserted: number, deactivated: number }`.
 
 ### Registration
 
@@ -40,16 +41,15 @@ In `packages/worker/src/index.ts`:
 
 - Create queue: `ticker-sync`
 - Register handler: `boss.work("ticker-sync", tickerSync)`
-- Schedule: `boss.schedule("ticker-sync", "0 6 * * *")` — daily at 06:00 UTC
-- Retry config: `retryLimit: 3, retryDelay: 60`
+- Schedule: `boss.schedule("ticker-sync", "0 6 * * *", { retryLimit: 3, retryDelay: 60 })` — daily at 06:00 UTC
 
 ## API Endpoint
 
 New file: `packages/api/src/routes/tickers.ts`
 
-- `POST /api/tickers/trigger` — sends the `ticker-sync` job via pg-boss, returns `{ queued: true }`.
+- `POST /api/tickers/trigger` — uses `getQueue()` from `../queue.js` to send the `ticker-sync` job with `{ retryLimit: 3, retryDelay: 60 }` options. Returns `{ jobId }` with 201 status, or 409 if job is already queued (null jobId).
 
-Registered in `packages/api/src/routes/index.ts`.
+Registered in `packages/api/src/index.ts` via `app.route()`.
 
 ## Error Handling
 
@@ -67,7 +67,7 @@ Registered in `packages/api/src/routes/index.ts`.
 | `packages/worker/src/ticker-sync.ts`    | New — ticker sync job logic       |
 | `packages/worker/src/index.ts`          | Register and schedule new job     |
 | `packages/api/src/routes/tickers.ts`    | New — manual trigger endpoint     |
-| `packages/api/src/routes/index.ts`      | Register tickers route            |
+| `packages/api/src/index.ts`             | Register tickers route            |
 
 ## Out of Scope
 
