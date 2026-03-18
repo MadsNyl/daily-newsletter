@@ -1,0 +1,107 @@
+<h2>How should users navigate to companies?</h2>
+<p class="subtitle">Pick the navigation pattern that fits this mobile-first app best</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #faf9f7; border-radius: 8px; height: 280px; display: flex; flex-direction: column; font-family: system-ui, sans-serif;">
+        <!-- Phone frame -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- Header -->
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e8e5e0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600; font-size: 14px; color: #1a1714;">Daily Newsletter</span>
+            <span style="font-size: 11px; color: #8a8680;">18. mar 2026</span>
+          </div>
+          <!-- Content placeholder -->
+          <div style="flex: 1; padding: 16px;">
+            <div style="background: #e8e5e0; height: 16px; width: 70%; border-radius: 4px; margin-bottom: 8px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 90%; border-radius: 4px; margin-bottom: 6px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 80%; border-radius: 4px; margin-bottom: 16px;"></div>
+            <div style="background: #e8e5e0; height: 16px; width: 65%; border-radius: 4px; margin-bottom: 8px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 85%; border-radius: 4px;"></div>
+          </div>
+          <!-- Bottom tab bar -->
+          <div style="border-top: 1px solid #e8e5e0; display: flex; padding: 8px 0 12px;">
+            <div style="flex: 1; text-align: center;">
+              <div style="font-size: 18px; margin-bottom: 2px;">📰</div>
+              <div style="font-size: 10px; font-weight: 600; color: #b5642a;">Nyheter</div>
+            </div>
+            <div style="flex: 1; text-align: center;">
+              <div style="font-size: 18px; margin-bottom: 2px;">📈</div>
+              <div style="font-size: 10px; color: #8a8680;">Aksjer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Bottom Tab Bar</h3>
+      <p>Persistent footer with "Nyheter" and "Aksjer" tabs. Always visible, standard mobile pattern. Easy to extend with more sections later.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #faf9f7; border-radius: 8px; height: 280px; display: flex; flex-direction: column; font-family: system-ui, sans-serif;">
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- Header with icon -->
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e8e5e0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600; font-size: 14px; color: #1a1714;">Daily Newsletter</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 11px; color: #8a8680;">18. mar 2026</span>
+              <div style="width: 28px; height: 28px; border-radius: 6px; background: #f3ede5; display: flex; align-items: center; justify-content: center; font-size: 14px;">📈</div>
+            </div>
+          </div>
+          <!-- Content -->
+          <div style="flex: 1; padding: 16px;">
+            <div style="background: #e8e5e0; height: 16px; width: 70%; border-radius: 4px; margin-bottom: 8px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 90%; border-radius: 4px; margin-bottom: 6px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 80%; border-radius: 4px; margin-bottom: 16px;"></div>
+            <div style="background: #e8e5e0; height: 16px; width: 65%; border-radius: 4px; margin-bottom: 8px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 85%; border-radius: 4px; margin-bottom: 16px;"></div>
+            <div style="background: #e8e5e0; height: 16px; width: 60%; border-radius: 4px; margin-bottom: 8px;"></div>
+            <div style="background: #e8e5e0; height: 12px; width: 75%; border-radius: 4px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Header Icon</h3>
+      <p>Stock chart icon in the top bar. Minimal, doesn't take up vertical space. Fits well with the existing clean header.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #faf9f7; border-radius: 8px; height: 280px; display: flex; flex-direction: column; font-family: system-ui, sans-serif;">
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- Header with hamburger -->
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e8e5e0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="width: 16px; height: 2px; background: #1a1714; border-radius: 1px;"></div>
+                <div style="width: 16px; height: 2px; background: #1a1714; border-radius: 1px;"></div>
+                <div style="width: 16px; height: 2px; background: #1a1714; border-radius: 1px;"></div>
+              </div>
+              <span style="font-weight: 600; font-size: 14px; color: #1a1714;">Daily Newsletter</span>
+            </div>
+            <span style="font-size: 11px; color: #8a8680;">18. mar 2026</span>
+          </div>
+          <!-- Drawer overlay -->
+          <div style="flex: 1; position: relative;">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 65%; background: white; box-shadow: 2px 0 12px rgba(0,0,0,0.1); padding: 20px 16px; z-index: 1;">
+              <div style="font-size: 12px; color: #8a8680; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Navigasjon</div>
+              <div style="padding: 10px 0; border-bottom: 1px solid #f0ede8; font-weight: 600; color: #b5642a; font-size: 13px;">📰 Nyheter</div>
+              <div style="padding: 10px 0; border-bottom: 1px solid #f0ede8; font-size: 13px; color: #1a1714;">📈 Aksjer</div>
+            </div>
+            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.15);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Drawer Menu</h3>
+      <p>Hamburger menu that slides out a navigation drawer. Hides navigation until needed. More complex interaction.</p>
+    </div>
+  </div>
+</div>

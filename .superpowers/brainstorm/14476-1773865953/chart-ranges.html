@@ -1,0 +1,49 @@
+<h2>Which time ranges should the chart support?</h2>
+<p class="subtitle">Users tap a range to switch the Yahoo Finance chart data</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="1d" onclick="toggleSelect(this)">
+    <div class="letter">1D</div>
+    <div class="content">
+      <h3>Intraday</h3>
+      <p>5-minute candles for today's trading session</p>
+    </div>
+  </div>
+  <div class="option" data-choice="5d" onclick="toggleSelect(this)">
+    <div class="letter">5D</div>
+    <div class="content">
+      <h3>5 Days</h3>
+      <p>15-minute candles covering the past week</p>
+    </div>
+  </div>
+  <div class="option" data-choice="1m" onclick="toggleSelect(this)">
+    <div class="letter">1M</div>
+    <div class="content">
+      <h3>1 Month</h3>
+      <p>Daily candles for the past month</p>
+    </div>
+  </div>
+  <div class="option" data-choice="6m" onclick="toggleSelect(this)">
+    <div class="letter">6M</div>
+    <div class="content">
+      <h3>6 Months</h3>
+      <p>Daily candles for the past half year</p>
+    </div>
+  </div>
+  <div class="option" data-choice="1y" onclick="toggleSelect(this)">
+    <div class="letter">1Y</div>
+    <div class="content">
+      <h3>1 Year</h3>
+      <p>Daily candles for the past year</p>
+    </div>
+  </div>
+  <div class="option" data-choice="5y" onclick="toggleSelect(this)">
+    <div class="letter">5Y</div>
+    <div class="content">
+      <h3>5 Years</h3>
+      <p>Weekly candles for the past 5 years</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 16px;">Select all ranges you want to include. Click multiple options.</p>
