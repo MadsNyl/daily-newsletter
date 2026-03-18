@@ -196,9 +196,7 @@ export default function NewsletterPage() {
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
           <div className="flex items-center gap-3 sm:justify-center">
-            <div className="sm:hidden">
-              <NavigationDrawer />
-            </div>
+            <NavigationDrawer />
             <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
               Daglig Nyhetsbrev
             </h1>
