@@ -180,46 +180,45 @@ export default function CompanyDetailPage() {
         <div className="border-b border-border-light px-4 py-4">
           <h2 className="mb-3 text-sm font-semibold text-ink">Analytikere</h2>
           {loadingQuote ? (
-            <div>
-              <Skeleton className="h-6 w-full mb-2 rounded-md" />
-              <Skeleton className="h-3 w-full" />
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Skeleton className="h-3 w-14" />
+                  <Skeleton className="h-5 flex-1 rounded" />
+                </div>
+              ))}
             </div>
           ) : quote ? (
             (() => {
               const a = quote.analysts;
               const total = a.buy + a.overweight + a.hold + a.underweight + a.sell;
               if (total === 0) return <p className="text-sm text-ink-tertiary">Ingen data</p>;
-              const segments = [
-                { count: a.buy, bg: "bg-green-600", text: "text-white" },
-                { count: a.overweight, bg: "bg-green-300", text: "text-green-900" },
-                { count: a.hold, bg: "bg-amber-400", text: "text-amber-900" },
-                { count: a.underweight, bg: "bg-red-300", text: "text-red-900" },
-                { count: a.sell, bg: "bg-red-500", text: "text-white" },
+              const bars = [
+                { label: "Kjøp", count: a.buy, bg: "bg-green-600", text: "text-white" },
+                { label: "Overvekt", count: a.overweight, bg: "bg-green-300", text: "text-green-900" },
+                { label: "Hold", count: a.hold, bg: "bg-amber-400", text: "text-amber-900" },
+                { label: "Undervekt", count: a.underweight, bg: "bg-red-300", text: "text-red-900" },
+                { label: "Selg", count: a.sell, bg: "bg-red-500", text: "text-white" },
               ];
+              const max = Math.max(...bars.map((b) => b.count));
               return (
-                <>
-                  <div className="flex h-6 overflow-hidden rounded-md">
-                    {segments.map(
-                      (s, i) =>
-                        s.count > 0 && (
+                <div className="space-y-1.5">
+                  {bars.map((b) => (
+                    <div key={b.label} className="flex items-center gap-2">
+                      <span className="w-14 shrink-0 text-[11px] text-ink">{b.label}</span>
+                      <div className="flex-1 h-5 rounded bg-border-light overflow-hidden">
+                        {b.count > 0 && (
                           <div
-                            key={i}
-                            className={`flex items-center justify-center text-[10px] font-semibold ${s.bg} ${s.text}`}
-                            style={{ flex: s.count }}
+                            className={`h-full rounded flex items-center px-1.5 ${b.bg} ${b.text}`}
+                            style={{ width: `${Math.max((b.count / max) * 100, 12)}%` }}
                           >
-                            {s.count}
+                            <span className="text-[10px] font-semibold">{b.count}</span>
                           </div>
-                        ),
-                    )}
-                  </div>
-                  <div className="mt-1.5 flex justify-between text-[9px] text-ink-tertiary">
-                    <span>Kjøp</span>
-                    <span>Overvekt</span>
-                    <span>Hold</span>
-                    <span>Undervekt</span>
-                    <span>Selg</span>
-                  </div>
-                </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               );
             })()
           ) : null}
