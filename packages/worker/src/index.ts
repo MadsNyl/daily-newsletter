@@ -3,7 +3,7 @@ import PgBoss from "pg-boss";
 import { fetchArticles } from "./article-fetcher.js";
 import { summarizePendingArticles } from "./article-summarizer.js";
 import { buildEdition } from "./edition-builder.js";
-import { summarizeEdition } from "./edition-summarizer.js";
+import { summarizeEdition as _summarizeEdition } from "./edition-summarizer.js";
 import { syncTickers } from "./ticker-sync.js";
 const FETCH_JOB = "article-fetch";
 const SUMMARIZE_JOB = "article-summarize";
