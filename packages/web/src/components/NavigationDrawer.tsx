@@ -26,40 +26,65 @@ export default function NavigationDrawer() {
   };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <button className="p-2 -ml-2 text-ink-secondary hover:text-ink transition-colors">
-          <Menu size={20} />
-        </button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Navigasjon</DrawerTitle>
-        </DrawerHeader>
-        <nav className="px-4 pb-8">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setOpen(false);
-                }}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors ${
-                  active
-                    ? "bg-accent-light text-accent font-semibold"
-                    : "text-ink-secondary hover:bg-surface-raised"
-                }`}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </DrawerContent>
-    </Drawer>
+    <>
+      {/* Mobile: Drawer */}
+      <div className="md:hidden">
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
+            <button className="p-2 -ml-2 text-ink-secondary hover:text-ink transition-colors">
+              <Menu size={20} />
+            </button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Navigasjon</DrawerTitle>
+            </DrawerHeader>
+            <nav className="px-4 pb-8">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      navigate(item.path);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors ${
+                      active
+                        ? "bg-accent-light text-accent font-semibold"
+                        : "text-ink-secondary hover:bg-surface-raised"
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </DrawerContent>
+        </Drawer>
+      </div>
+
+      {/* Desktop: Inline nav links */}
+      <nav className="hidden md:flex items-center gap-6">
+        {NAV_ITEMS.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`text-sm font-medium transition-colors ${
+                active
+                  ? "text-accent"
+                  : "text-ink-secondary hover:text-ink"
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+    </>
   );
 }

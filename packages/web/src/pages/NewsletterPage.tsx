@@ -1,14 +1,11 @@
-import { useEffect, useReducer, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
 import type { NewsletterEdition, Company } from "../api/client";
 import { fetchEdition, fetchCompanies } from "../api/client";
 import ArticleCard from "../components/ArticleCard";
 import DateDrawer from "../components/DateDrawer";
 import CompanyDrawer from "../components/CompanyDrawer";
-import SummaryDrawer from "../components/SummaryDrawer";
 import NavigationDrawer from "../components/NavigationDrawer";
-
-const Markdown = lazy(() => import("react-markdown"));
 
 function formatDateParam(date: Date): string {
   const y = date.getFullYear();
@@ -58,59 +55,6 @@ function reducer(_state: State, action: Action): State {
     case "error":
       return { edition: null, loading: false, error: action.message };
   }
-}
-
-function DesktopSummary({ summary }: { summary: string }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="mb-6 hidden animate-fade-in sm:block">
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between rounded-lg border border-border-light bg-surface-raised px-5 py-3.5 text-left transition-all hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        <div className="flex items-center gap-2.5">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="h-4 w-4 text-accent"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span className="text-sm font-medium text-ink">Dagens oppsummering</span>
-        </div>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className={`h-4 w-4 text-ink-tertiary transition-transform ${expanded ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-      {expanded && (
-        <div className="mt-3 rounded-lg border border-border-light bg-white px-6 py-5 animate-fade-in">
-          <div className="prose prose-sm max-w-none text-ink-secondary prose-headings:font-serif prose-headings:text-ink prose-strong:text-ink prose-p:leading-relaxed">
-            <Suspense fallback={<p className="text-sm text-ink-tertiary">Laster…</p>}>
-              <Markdown>{summary}</Markdown>
-            </Suspense>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function NewsletterPage() {
@@ -192,12 +136,14 @@ export default function NewsletterPage() {
 
       <div className="border-b-2 border-accent" />
 
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12 lg:max-w-5xl lg:px-8 xl:max-w-6xl">
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
-          <div className="flex items-center gap-3 sm:justify-center">
-            <NavigationDrawer />
-            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
+          <div className="flex items-center gap-3 sm:justify-center md:relative md:justify-center">
+            <div className="md:absolute md:left-0">
+              <NavigationDrawer />
+            </div>
+            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl md:text-4xl">
               Daglig Nyhetsbrev
             </h1>
           </div>
@@ -218,7 +164,7 @@ export default function NewsletterPage() {
             activeFilter={companyFilter}
             onFilterChange={setCompanyFilter}
           />
-          {state.edition?.summary && <SummaryDrawer summary={state.edition.summary} />}
+          {/* {state.edition?.summary && <SummaryDrawer summary={state.edition.summary} />} */}
         </div>
 
         {/* Desktop: Inline date navigation */}
@@ -299,7 +245,7 @@ export default function NewsletterPage() {
         )}
 
         {/* Desktop: Daily summary */}
-        {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />}
+        {/* {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />} */}
 
         {/* Articles */}
         <section id="innhold" aria-label="Artikler" aria-live="polite">
@@ -337,7 +283,7 @@ export default function NewsletterPage() {
                     ` om ${companies.find((c) => c.ticker === companyFilter)?.name ?? companyFilter}`}
                 </p>
               )}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:gap-y-0">
                 {state.edition.articles.map((article, i) => (
                   <ArticleCard
                     key={article.id}

@@ -10,6 +10,8 @@ import {
 const SOURCE_COLORS: Record<string, { text: string; bg: string }> = {
   E24: { text: "text-[var(--color-source-e24)]", bg: "bg-[var(--color-source-e24-bg)]" },
   "Økonomi24": { text: "text-[var(--color-source-okonomi24)]", bg: "bg-[var(--color-source-okonomi24-bg)]" },
+  CNBC: { text: "text-[var(--color-source-cnbc)]", bg: "bg-[var(--color-source-cnbc-bg)]" },
+  "Yahoo Finance": { text: "text-[var(--color-source-yahoo)]", bg: "bg-[var(--color-source-yahoo-bg)]" },
 };
 
 interface ArticleCardProps {

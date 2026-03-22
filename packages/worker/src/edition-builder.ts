@@ -1,11 +1,8 @@
 import { db } from "./db/index.js";
 import { article, newsletterEdition, editionArticle } from "./db/schema.js";
-import { eq, and, gte, lt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-async function buildEditionForDate(
-  date: Date,
-  articles: { id: string }[],
-): Promise<number> {
+async function addToEdition(date: Date, articles: { id: string }[]): Promise<number> {
   const existing = await db
     .select()
     .from(newsletterEdition)
@@ -13,10 +10,15 @@ async function buildEditionForDate(
     .limit(1);
 
   let editionId: string;
+  let currentMaxOrder = 0;
 
   if (existing.length > 0) {
     editionId = existing[0].id;
-    await db.delete(editionArticle).where(eq(editionArticle.editionId, editionId));
+    const existingArticles = await db
+      .select()
+      .from(editionArticle)
+      .where(eq(editionArticle.editionId, editionId));
+    currentMaxOrder = existingArticles.reduce((max, ea) => Math.max(max, ea.order), 0);
   } else {
     const [newEdition] = await db
       .insert(newsletterEdition)
@@ -25,16 +27,16 @@ async function buildEditionForDate(
     editionId = newEdition.id;
   }
 
-  const editionArticles = articles.map((a, index) => ({
+  const newEditionArticles = articles.map((a, index) => ({
     editionId,
     articleId: a.id,
-    order: index + 1,
+    order: currentMaxOrder + index + 1,
   }));
 
-  await db.insert(editionArticle).values(editionArticles);
+  await db.insert(editionArticle).values(newEditionArticles);
 
   const dateStr = date.toISOString().split("T")[0];
-  console.log(`Edition for ${dateStr} built with ${articles.length} articles`);
+  console.log(`Edition for ${dateStr}: added ${articles.length} articles`);
 
   return articles.length;
 }
@@ -43,26 +45,29 @@ export async function buildEdition(): Promise<{ date: string; articleCount: numb
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // Get all summarized articles created today
+  // Get all summarized articles not yet assigned to any edition
   const summarizedArticles = await db
     .select()
     .from(article)
     .where(
-      and(eq(article.status, "SUMMARIZED"), gte(article.createdAt, today), lt(article.createdAt, tomorrow)),
+      eq(article.status, "SUMMARIZED"),
     );
 
-  if (summarizedArticles.length === 0) {
-    console.log("No summarized articles found for today, skipping edition build");
+  // Filter out articles already assigned to an edition
+  const assignedRows = await db.select({ articleId: editionArticle.articleId }).from(editionArticle);
+  const assignedIds = new Set(assignedRows.map((r) => r.articleId));
+
+  const unassignedArticles = summarizedArticles.filter((a) => !assignedIds.has(a.id));
+
+  if (unassignedArticles.length === 0) {
+    console.log("No unassigned summarized articles found, skipping edition build");
     return { date: today.toISOString().split("T")[0], articleCount: 0 };
   }
 
-  // Group articles by publishedAt date (fall back to today if no publishedAt)
+  // Group articles by publishedAt date (fall back to createdAt)
   const byDate = new Map<string, { id: string }[]>();
 
-  for (const a of summarizedArticles) {
+  for (const a of unassignedArticles) {
     const articleDate = new Date(a.publishedAt ?? a.createdAt);
     articleDate.setHours(0, 0, 0, 0);
     const dateKey = articleDate.toISOString().split("T")[0];
@@ -77,7 +82,7 @@ export async function buildEdition(): Promise<{ date: string; articleCount: numb
   for (const [dateKey, articles] of byDate) {
     const editionDate = new Date(dateKey);
     editionDate.setHours(0, 0, 0, 0);
-    totalCount += await buildEditionForDate(editionDate, articles);
+    totalCount += await addToEdition(editionDate, articles);
   }
 
   return { date: today.toISOString().split("T")[0], articleCount: totalCount };

@@ -3,7 +3,7 @@ import PgBoss from "pg-boss";
 import { fetchArticles } from "./article-fetcher.js";
 import { summarizePendingArticles } from "./article-summarizer.js";
 import { buildEdition } from "./edition-builder.js";
-import { summarizeEdition } from "./edition-summarizer.js";
+import { summarizeEdition as _summarizeEdition } from "./edition-summarizer.js";
 import { syncTickers } from "./ticker-sync.js";
 const FETCH_JOB = "article-fetch";
 const SUMMARIZE_JOB = "article-summarize";
@@ -52,17 +52,17 @@ async function main() {
     const result = await buildEdition();
     console.log(`Edition build complete: ${result.date}, ${result.articleCount} articles`);
 
-    if (result.articleCount > 0) {
-      await boss.send(SUMMARIZE_EDITION_JOB, {});
-      console.log("Queued edition-summarize job");
-    }
+    // if (result.articleCount > 0) {
+    //   await boss.send(SUMMARIZE_EDITION_JOB, {});
+    //   console.log("Queued edition-summarize job");
+    // }
   });
 
-  await boss.work(SUMMARIZE_EDITION_JOB, async () => {
-    console.log("Starting edition summarize...");
-    const result = await summarizeEdition();
-    console.log(`Edition summarize complete: ${result.date}, updated: ${result.updated}`);
-  });
+  // await boss.work(SUMMARIZE_EDITION_JOB, async () => {
+  //   console.log("Starting edition summarize...");
+  //   const result = await summarizeEdition();
+  //   console.log(`Edition summarize complete: ${result.date}, updated: ${result.updated}`);
+  // });
 
   await boss.work(TICKER_SYNC_JOB, async () => {
     console.log("Starting ticker sync...");
