@@ -107,6 +107,10 @@ export async function scrapeOkonomi24(): Promise<ScrapedArticle[]> {
       : `${BASE_URL}${entry.item.url}`;
     const publishedAt = await fetchPublishedDate(sourceUrl);
 
+    if (!publishedAt) {
+      continue;
+    }
+
     articles.push({
       title: entry.item.headline,
       sourceUrl,

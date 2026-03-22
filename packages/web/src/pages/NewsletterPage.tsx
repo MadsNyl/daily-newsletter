@@ -192,12 +192,14 @@ export default function NewsletterPage() {
 
       <div className="border-b-2 border-accent" />
 
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12 lg:max-w-5xl lg:px-8 xl:max-w-6xl">
         {/* Header */}
         <header className="mb-6 animate-fade-in sm:mb-10">
-          <div className="flex items-center gap-3 sm:justify-center">
-            <NavigationDrawer />
-            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl sm:text-center">
+          <div className="flex items-center gap-3 sm:justify-center md:relative md:justify-center">
+            <div className="md:absolute md:left-0">
+              <NavigationDrawer />
+            </div>
+            <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-5xl md:text-4xl">
               Daglig Nyhetsbrev
             </h1>
           </div>
@@ -218,7 +220,7 @@ export default function NewsletterPage() {
             activeFilter={companyFilter}
             onFilterChange={setCompanyFilter}
           />
-          {state.edition?.summary && <SummaryDrawer summary={state.edition.summary} />}
+          {/* {state.edition?.summary && <SummaryDrawer summary={state.edition.summary} />} */}
         </div>
 
         {/* Desktop: Inline date navigation */}
@@ -299,7 +301,7 @@ export default function NewsletterPage() {
         )}
 
         {/* Desktop: Daily summary */}
-        {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />}
+        {/* {state.edition?.summary && <DesktopSummary summary={state.edition.summary} />} */}
 
         {/* Articles */}
         <section id="innhold" aria-label="Artikler" aria-live="polite">
@@ -337,7 +339,7 @@ export default function NewsletterPage() {
                     ` om ${companies.find((c) => c.ticker === companyFilter)?.name ?? companyFilter}`}
                 </p>
               )}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:gap-y-0">
                 {state.edition.articles.map((article, i) => (
                   <ArticleCard
                     key={article.id}
